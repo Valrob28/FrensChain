@@ -1,4 +1,5 @@
 {
+  "name": "frenschain-dating-app",
   "version": 2,
   "builds": [
     {
