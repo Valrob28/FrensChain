@@ -5,12 +5,6 @@
   "buildCommand": "echo 'No build required for static files'",
   "outputDirectory": "simple-web",
   "installCommand": "echo 'No dependencies to install'",
-  "builds": [
-    {
-      "src": "simple-web/**/*",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/",
@@ -27,17 +21,8 @@
     {
       "src": "/index",
       "dest": "/simple-web/index.html"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/backend/src/index-simple.ts"
     }
   ],
-  "functions": {
-    "backend/src/index-simple.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
