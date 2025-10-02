@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "simple-web/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/simple-web/home.html"
+    },
+    {
+      "src": "/home",
+      "dest": "/simple-web/home.html"
+    },
+    {
+      "src": "/tinder",
+      "dest": "/simple-web/tinder.html"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/src/index-simple.ts"
+    }
+  ],
+  "functions": {
+    "backend/src/index-simple.ts": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}

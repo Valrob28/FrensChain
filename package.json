@@ -1,0 +1,41 @@
+{
+  "name": "frenschain",
+  "version": "1.0.0",
+  "description": "FrensChain - Application de Rencontre Solana avec Géolocalisation",
+  "main": "backend/src/index-simple.ts",
+  "scripts": {
+    "dev": "cd backend && npm run dev:simple",
+    "build": "cd backend && npm run build",
+    "start": "cd backend && npm start",
+    "vercel-build": "cd backend && npm install && npm run build"
+  },
+  "keywords": [
+    "solana",
+    "blockchain",
+    "dating",
+    "crypto",
+    "geolocation",
+    "web3"
+  ],
+  "author": "FrensChain Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/express": "^4.17.17",
+    "@types/cors": "^2.8.13",
+    "typescript": "^5.1.6",
+    "ts-node": "^10.9.1",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

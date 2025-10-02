@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  walletAddress String    @unique
+  username      String    @unique
+  profileImage  String?
+  isPremium     Boolean   @default(false)
+  premiumUntil  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  interests     UserInterest[]
+  sentLikes     Like[]        @relation("SentLikes")
+  receivedLikes Like[]        @relation("ReceivedLikes")
+  matches       Match[]       @relation("UserMatches")
+  matchPartners Match[]       @relation("MatchPartners")
+  messages      Message[]
+  badges        UserBadge[]
+  referrals     Referral[]    @relation("Referrer")
+  referredBy    Referral?     @relation("ReferredUser")
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Interest {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+
+  // Relations
+  users UserInterest[]
+
+  @@map("interests")
+}
+
+model UserInterest {
+  id        String @id @default(cuid())
+  userId    String
+  interestId String
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interest  Interest  @relation(fields: [interestId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, interestId])
+  @@map("user_interests")
+}
+
+model Like {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  createdAt   DateTime @default(now())
+
+  sender      User     @relation("SentLikes", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedLikes", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("likes")
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+
+  user1     User     @relation("UserMatches", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2     User     @relation("MatchPartners", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  messages  Message[]
+
+  @@unique([user1Id, user2Id])
+  @@map("matches")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  matchId   String
+  senderId  String
+  content   String
+  messageType String @default("text") // text, emoji, image
+  isEncrypted Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model Badge {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+  icon        String?
+  rarity      String @default("common") // common, rare, epic, legendary
+
+  // Relations
+  users UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Referral {
+  id            String   @id @default(cuid())
+  referrerId    String
+  referredId    String
+  rewardAmount  Float    @default(0)
+  createdAt     DateTime @default(now())
+
+  referrer      User     @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred      User     @relation("ReferredUser", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, referredId])
+  @@map("referrals")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Float
+  currency      String   @default("SOL")
+  transactionHash String @unique
+  paymentType   String   // initial, monthly
+  status        String   @default("pending") // pending, confirmed, failed
+  createdAt     DateTime @default(now())
+  confirmedAt   DateTime?
+
+  @@map("payments")
+}

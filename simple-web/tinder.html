@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrensChain - Tinder Solana</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-base@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-phantom@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-solflare@latest/lib/index.iife.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: white;
+            position: relative;
+        }
+        
+        /* Mobile First - Optimizations */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .swipe-container {
+                height: 500px;
+                margin: 15px;
+            }
+            
+            .profile-image {
+                height: 65%;
+            }
+            
+            .profile-info {
+                padding: 15px;
+            }
+            
+            .profile-name {
+                font-size: 1.5rem;
+            }
+            
+            .profile-bio {
+                font-size: 0.9rem;
+            }
+            
+            .swipe-actions {
+                bottom: 20px;
+                gap: 15px;
+            }
+            
+            .swipe-button {
+                width: 55px;
+                height: 55px;
+                font-size: 1.3rem;
+            }
+            
+            .navigation {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: none;
+            }
+            
+            .nav-item {
+                padding: 12px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .chat-input {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: none;
+                transform: none;
+            }
+            
+            .chat-messages {
+                height: calc(100vh - 120px);
+                padding: 15px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+            }
+            
+            .desktop-controls {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 767px) {
+            .app-container {
+                max-width: 100%;
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .swipe-container {
+                height: 600px;
+            }
+            
+            .profile-image {
+                height: 70%;
+            }
+            
+            .swipe-button {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Desktop compatibility */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 500px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.1);
+                border-radius: 20px;
+                margin: 20px auto;
+                min-height: calc(100vh - 40px);
+            }
+            
+            .swipe-container {
+                height: 700px;
+            }
+            
+            .profile-image {
+                height: 75%;
+            }
+            
+            .swipe-actions {
+                bottom: 40px;
+            }
+            
+            .swipe-button {
+                width: 70px;
+                height: 70px;
+                font-size: 1.8rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 600px;
+            }
+            
+            .swipe-container {
+                height: 800px;
+            }
+            
+            .profile-image {
+                height: 80%;
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .wallet-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        
+        .wallet-connected {
+            background: #14F195;
+            color: #000;
+        }
+        
+        .wallet-connected.premium {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+        }
+        
+        .wallet-disconnected {
+            background: #ef4444;
+        }
+        
+        .swipe-container {
+            position: relative;
+            height: 600px;
+            margin: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .profile-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .profile-card:active {
+            cursor: grabbing;
+        }
+        
+        .profile-card.swiped-left {
+            transform: translateX(-100%) rotate(-30deg);
+            opacity: 0;
+        }
+        
+        .profile-card.swiped-right {
+            transform: translateX(100%) rotate(30deg);
+            opacity: 0;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 70%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .profile-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 30px 20px 20px;
+        }
+        
+        .profile-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .profile-age {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .profile-bio {
+            margin-top: 10px;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        
+        .interests {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .interest-tag {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .swipe-actions {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+        
+        .swipe-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .swipe-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .swipe-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .swipe-button:disabled:hover {
+            transform: none !important;
+        }
+        
+        .swipe-button.pass {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .swipe-button.like {
+            background: #14F195;
+            color: #000;
+        }
+        
+        .swipe-button.super-like {
+            background: #9945FF;
+            color: white;
+        }
+        
+        .no-more-profiles {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .no-more-profiles h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .matches-screen {
+            display: none;
+            padding: 20px;
+        }
+        
+        .matches-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .matches-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .match-item {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .match-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .match-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .match-name {
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        .chat-screen {
+            display: none;
+            height: 100vh;
+            background: #f8fafc;
+        }
+        
+        .chat-header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chat-back {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .chat-name {
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        .chat-messages {
+            padding: 20px;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        
+        .message.sent {
+            justify-content: flex-end;
+        }
+        
+        .message.received {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .message.sent .message-bubble {
+            background: #9945FF;
+            color: white;
+        }
+        
+        .message.received .message-bubble {
+            background: white;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .message.received .message-time {
+            text-align: left;
+        }
+        
+        .chat-input {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 15px 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            outline: none;
+        }
+        
+        .chat-send {
+            background: #9945FF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .wallet-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .wallet-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wallet-option:hover {
+            border-color: #9945FF;
+            background: #f8fafc;
+        }
+        
+        .wallet-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-size: cover;
+        }
+        
+        .match-modal {
+            text-align: center;
+        }
+        
+        .match-modal h3 {
+            font-size: 2rem;
+            color: #9945FF;
+            margin-bottom: 20px;
+        }
+        
+        .match-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .premium-features {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .premium-button {
+            background: #14F195;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            display: flex;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .nav-item {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .nav-item.active {
+            background: #f8fafc;
+            color: #9945FF;
+        }
+        
+        .nav-item:hover {
+            background: #f8fafc;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .swipe-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        .swipe-hint.hidden {
+            display: none;
+        }
+        
+        /* Desktop enhancements */
+        .desktop-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            z-index: 100;
+        }
+        
+        .desktop-controls.hidden {
+            display: none;
+        }
+        
+        .keyboard-hint {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 2px;
+            display: inline-block;
+        }
+        
+        /* Larger screens optimization */
+        @media (min-width: 1200px) {
+            .app-container {
+                max-width: 700px;
+            }
+            
+            .swipe-container {
+                height: 900px;
+            }
+            
+            .profile-info {
+                padding: 40px 30px 30px;
+            }
+            
+            .profile-name {
+                font-size: 2.5rem;
+            }
+            
+            .profile-bio {
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+        }
+        
+        /* Ultra-wide screens */
+        @media (min-width: 1600px) {
+            .app-container {
+                max-width: 800px;
+            }
+            
+            .swipe-container {
+                height: 1000px;
+            }
+        }
+        
+        /* Mobile Touch Optimizations */
+        @media (max-width: 768px) {
+            .profile-card {
+                touch-action: pan-y;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            
+            .swipe-button {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            
+            .nav-item {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            
+            .chat-input input {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            .modal-content {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .matches-list {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .match-item {
+                padding: 10px;
+            }
+            
+            .match-avatar {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .swipe-container {
+                height: 400px;
+            }
+            
+            .profile-image {
+                height: 60%;
+            }
+            
+            .swipe-actions {
+                bottom: 15px;
+            }
+            
+            .swipe-button {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Solana Button Styles */
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(153, 69, 255, 0.3);
+        }
+        
+        .button.secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        
+        .button.secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+        
+        /* Enhanced Environment Features */
+        .environment-indicator {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .environment-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #14F195;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .stats-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            min-width: 150px;
+        }
+        
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .stats-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #14F195;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            z-index: 1001;
+            animation: slideUp 0.3s ease;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(153, 69, 255, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(153, 69, 255, 0.4);
+        }
+        
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.9);
+            color: #14F195;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            max-width: 300px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .debug-panel.show {
+            display: block;
+        }
+        
+        .performance-indicator {
+            position: fixed;
+            top: 50px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Environment Indicators -->
+    <div class="environment-indicator">
+        <div class="environment-dot"></div>
+        <span>FrensChain v1.0</span>
+    </div>
+    
+    <div class="stats-panel" id="stats-panel">
+        <div class="stats-item">
+            <span>Profils vus:</span>
+            <span id="profiles-viewed">0</span>
+        </div>
+        <div class="stats-item">
+            <span>Likes:</span>
+            <span id="total-likes">0</span>
+        </div>
+        <div class="stats-item">
+            <span>Matches:</span>
+            <span id="total-matches">0</span>
+        </div>
+        <div class="stats-item">
+            <span>Messages:</span>
+            <span id="total-messages">0</span>
+        </div>
+    </div>
+    
+    <div class="performance-indicator" id="performance-indicator">
+        <span>FPS: <span id="fps-counter">60</span></span>
+    </div>
+    
+    <div class="floating-action" id="floating-action" onclick="toggleDebugPanel()">
+        🔧
+    </div>
+    
+    <div class="debug-panel" id="debug-panel">
+        <div style="font-weight: bold; margin-bottom: 10px; color: #14F195;">Debug Console</div>
+        <div id="debug-log"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔥 FrensChain</h1>
+            <div id="wallet-status" class="wallet-status wallet-disconnected">
+                🔗 Connecter
+            </div>
+        </div>
+
+        <!-- Main Swipe Interface -->
+        <div id="swipe-interface">
+            <div id="limits-info"></div>
+            <div class="swipe-container" id="swipe-container">
+                <div class="swipe-hint" id="swipe-hint">
+                    <h3>👆 Glissez pour découvrir</h3>
+                    <p>Glissez à droite pour liker ❤️<br>Glissez à gauche pour passer ❌</p>
+                </div>
+            </div>
+            
+            <div class="swipe-actions">
+                <button class="swipe-button pass" onclick="swipeLeft()">❌</button>
+                <button class="swipe-button super-like" onclick="superLike()" id="super-like-btn">⭐</button>
+                <button class="swipe-button like" onclick="swipeRight()" id="like-btn">❤️</button>
+            </div>
+        </div>
+
+        <!-- Matches Screen -->
+        <div id="matches-screen" class="matches-screen hidden">
+            <div class="matches-header">
+                <h2>💕 Vos Matches</h2>
+                <p>Commencez une conversation !</p>
+            </div>
+            <div class="matches-list" id="matches-list">
+                <!-- Matches will be populated here -->
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chat-screen" class="chat-screen hidden">
+            <div class="chat-header">
+                <button class="chat-back" onclick="showMatches()">←</button>
+                <div class="chat-avatar" id="chat-avatar"></div>
+                <div>
+                    <div class="chat-name" id="chat-name"></div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be populated here -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Tapez un message..." onkeypress="handleKeyPress(event)">
+                <button class="chat-send" onclick="sendMessage()">📤</button>
+            </div>
+        </div>
+
+        <!-- No More Profiles -->
+        <div id="no-more-profiles" class="no-more-profiles hidden">
+            <h2>🎉 Plus de profils !</h2>
+            <p>Vous avez vu tous les profils disponibles.</p>
+            <button class="premium-button" onclick="showPremium()">✨ Voir plus avec Premium</button>
+        </div>
+
+        <!-- Premium Features -->
+        <div id="premium-features" class="premium-features hidden">
+            <h3>✨ FrensChain Premium</h3>
+            <p>Débloquez plus de profils et fonctionnalités !</p>
+            <div style="margin: 20px 0;">
+                <p>💰 Prix: 0.05 SOL/mois</p>
+                <p>🎯 Profils illimités</p>
+                <p>⭐ Super Likes illimités</p>
+                <p>🔍 Filtres avancés</p>
+            </div>
+            <button class="premium-button" onclick="purchasePremium()">💳 Acheter Premium</button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <div class="nav-item active" onclick="showSwipe()">
+                <div>🎯</div>
+                <div style="font-size: 0.8rem;">Découvrir</div>
+            </div>
+            <div class="nav-item" onclick="showMatches()">
+                <div>💕</div>
+                <div style="font-size: 0.8rem;">Matches</div>
+            </div>
+            <div class="nav-item" onclick="showPremium()">
+                <div>✨</div>
+                <div style="font-size: 0.8rem;">Premium</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Controls -->
+    <div class="desktop-controls" id="desktop-controls">
+        <div style="font-weight: bold; margin-bottom: 8px;">🎮 Contrôles Clavier</div>
+        <div><span class="keyboard-hint">←</span> Passer</div>
+        <div><span class="keyboard-hint">→</span> Liker</div>
+        <div><span class="keyboard-hint">↑</span> Super Like</div>
+        <div><span class="keyboard-hint">ESC</span> Retour</div>
+    </div>
+
+    <!-- Wallet Connect Modal -->
+    <div id="wallet-modal" class="modal">
+        <div class="modal-content">
+            <h3>🔗 Connecter votre Wallet</h3>
+            <div class="wallet-options">
+                <div class="wallet-option" onclick="connectPhantom()">
+                    <div class="wallet-icon" style="background: #8b5cf6;"></div>
+                    <div>
+                        <div style="font-weight: bold;">Phantom</div>
+                        <div style="font-size: 0.8rem; color: #64748b;">Wallet populaire</div>
+                    </div>
+                </div>
+                <div class="wallet-option" onclick="connectSolflare()">
+                    <div class="wallet-icon" style="background: #3b82f6;"></div>
+                    <div>
+                        <div style="font-weight: bold;">Solflare</div>
+                        <div style="font-size: 0.8rem; color: #64748b;">Wallet alternatif</div>
+                    </div>
+                </div>
+                <div class="wallet-option" onclick="connectManual()">
+                    <div class="wallet-icon" style="background: #64748b;"></div>
+                    <div>
+                        <div style="font-weight: bold;">Adresse manuelle</div>
+                        <div style="font-size: 0.8rem; color: #64748b;">Coller votre adresse</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Modal -->
+    <div id="match-modal" class="modal">
+        <div class="modal-content">
+            <div class="match-modal">
+                <h3>🎉 C'est un Match !</h3>
+                <div class="match-avatar-large" id="match-avatar-large"></div>
+                <p>Vous avez matché avec <span id="match-name-large"></span> !</p>
+                <button class="premium-button" onclick="startChat()" style="margin-top: 20px;">💬 Commencer à discuter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:3001/api';
+        let currentUser = null;
+        let currentProfileIndex = 0;
+        let likedProfiles = [];
+        let matches = [];
+        let currentMatch = null;
+        let isConnected = false;
+        let isPremium = false;
+        let dailyLikes = 0;
+        let maxDailyLikes = 5; // Limite freemium
+        let superLikesUsed = 0;
+        let maxSuperLikes = 1; // Limite freemium
+        let chatMessages = {}; // Stockage des messages par match
+        let currentChatId = null;
+
+        // Profils de démonstration
+        const demoProfiles = [
+            {
+                id: 1,
+                name: "Alice",
+                age: 25,
+                interests: ["Crypto", "Voyage", "Sport"],
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop&crop=face",
+                bio: "Passionnée de crypto et d'aventures ! 🚀 Aime les randonnées et les nouvelles technologies."
+            },
+            {
+                id: 2,
+                name: "Bob",
+                age: 28,
+                interests: ["Tech", "Gaming", "Crypto"],
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face",
+                bio: "Développeur blockchain, gamer et crypto enthusiast 💻 Toujours à la recherche de nouvelles idées."
+            },
+            {
+                id: 3,
+                name: "Charlie",
+                age: 23,
+                interests: ["Art", "Musique", "Crypto"],
+                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop&crop=face",
+                bio: "Artiste numérique et collectionneur NFT 🎨 Créateur de contenu et musicien."
+            },
+            {
+                id: 4,
+                name: "Diana",
+                age: 27,
+                interests: ["Fitness", "Crypto", "Entrepreneuriat"],
+                image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop&crop=face",
+                bio: "Fitness coach et entrepreneure dans la DeFi 💪 Passionnée de santé et finance décentralisée."
+            },
+            {
+                id: 5,
+                name: "Eve",
+                age: 26,
+                interests: ["Photographie", "Voyage", "Crypto"],
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop&crop=face",
+                bio: "Photographe de voyage et crypto trader 📸 J'aime capturer les moments et les opportunités."
+            },
+            {
+                id: 6,
+                name: "Frank",
+                age: 30,
+                interests: ["Business", "Crypto", "Voyage"],
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=600&fit=crop&crop=face",
+                bio: "Entrepreneur dans la blockchain et globe-trotter 🌍 Toujours en mouvement !"
+            },
+            {
+                id: 7,
+                name: "Grace",
+                age: 24,
+                interests: ["Art", "Crypto", "Musique"],
+                image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=600&fit=crop&crop=face",
+                bio: "Artiste et musicienne, collectionneuse d'art NFT 🎵 Créativité et innovation."
+            },
+            {
+                id: 8,
+                name: "Henry",
+                age: 29,
+                interests: ["Tech", "Crypto", "Sport"],
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=600&fit=crop&crop=face",
+                bio: "Ingénieur logiciel et athlète 🏃‍♂️ Passionné de tech et de fitness."
+            }
+        ];
+
+        // Enhanced Environment Variables
+        let environmentStats = {
+            profilesViewed: 0,
+            totalLikes: 0,
+            totalMatches: 0,
+            totalMessages: 0,
+            startTime: Date.now(),
+            debugMode: false
+        };
+        
+        let fpsCounter = 0;
+        let lastFpsTime = Date.now();
+        
+        // Initialisation
+        window.onload = function() {
+            checkWalletConnection();
+            checkPremiumStatus();
+            loadProfiles();
+            hideSwipeHint();
+            detectScreenSize();
+            updateLimitsDisplay();
+            initializeChatMessages();
+            initializeEnvironment();
+            startPerformanceMonitoring();
+        };
+
+        // Wallet Connection
+        function checkWalletConnection() {
+            const walletAddress = localStorage.getItem('walletAddress');
+            if (walletAddress) {
+                isConnected = true;
+                updateWalletStatus(walletAddress);
+            }
+        }
+
+        function updateWalletStatus(address) {
+            const status = document.getElementById('wallet-status');
+            if (address) {
+                const premiumIcon = isPremium ? '👑' : '🔗';
+                status.textContent = `${premiumIcon} ${address.slice(0, 6)}...${address.slice(-4)}`;
+                status.className = isPremium ? 'wallet-status wallet-connected premium' : 'wallet-status wallet-connected';
+            } else {
+                status.textContent = '🔗 Connecter';
+                status.className = 'wallet-status wallet-disconnected';
+            }
+        }
+        
+        // Premium Management
+        function checkPremiumStatus() {
+            const premiumStatus = localStorage.getItem('isPremium');
+            const premiumExpiry = localStorage.getItem('premiumExpiry');
+            
+            if (premiumStatus === 'true' && premiumExpiry && new Date() < new Date(premiumExpiry)) {
+                isPremium = true;
+                maxDailyLikes = 999; // Illimité pour premium
+                maxSuperLikes = 5; // Plus de super likes
+            } else {
+                isPremium = false;
+                maxDailyLikes = 5; // Limite freemium
+                maxSuperLikes = 1; // Limite freemium
+                // Nettoyer les données premium expirées
+                localStorage.removeItem('isPremium');
+                localStorage.removeItem('premiumExpiry');
+            }
+        }
+        
+        function updateLimitsDisplay() {
+            const likesLeft = maxDailyLikes - dailyLikes;
+            const superLikesLeft = maxSuperLikes - superLikesUsed;
+            
+            // Mettre à jour l'affichage des limites
+            const limitsInfo = document.getElementById('limits-info');
+            if (limitsInfo) {
+                limitsInfo.innerHTML = `
+                    <div style="background: ${isPremium ? 'linear-gradient(135deg, #9945FF, #14F195)' : '#f1f5f9'}; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center;">
+                        <div style="font-weight: bold; color: ${isPremium ? 'white' : '#1e293b'};">
+                            ${isPremium ? '👑 Premium Actif' : '🆓 Version Gratuite'}
+                        </div>
+                        <div style="font-size: 0.9rem; color: ${isPremium ? 'white' : '#64748b'}; margin-top: 5px;">
+                            ${isPremium ? 'Likes illimités • 5 Super Likes' : `${likesLeft} likes restants • ${superLikesLeft} Super Like`}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Désactiver les boutons si limites atteintes
+            const likeBtn = document.getElementById('like-btn');
+            const superLikeBtn = document.getElementById('super-like-btn');
+            
+            if (likeBtn) {
+                likeBtn.disabled = !isPremium && dailyLikes >= maxDailyLikes;
+            }
+            
+            if (superLikeBtn) {
+                superLikeBtn.disabled = !isPremium && superLikesUsed >= maxSuperLikes;
+            }
+        }
+
+        function showWalletModal() {
+            document.getElementById('wallet-modal').style.display = 'block';
+        }
+
+        function hideWalletModal() {
+            document.getElementById('wallet-modal').style.display = 'none';
+        }
+
+        function connectPhantom() {
+            // Simulation de connexion Phantom
+            const mockAddress = '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU';
+            localStorage.setItem('walletAddress', mockAddress);
+            isConnected = true;
+            updateWalletStatus(mockAddress);
+            hideWalletModal();
+            showNotification('✅ Wallet Phantom connecté !');
+        }
+
+        function connectSolflare() {
+            // Simulation de connexion Solflare
+            const mockAddress = '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM';
+            localStorage.setItem('walletAddress', mockAddress);
+            isConnected = true;
+            updateWalletStatus(mockAddress);
+            hideWalletModal();
+            showNotification('✅ Wallet Solflare connecté !');
+        }
+
+        function connectManual() {
+            const address = prompt('Entrez votre adresse wallet Solana:');
+            if (address && address.length > 20) {
+                localStorage.setItem('walletAddress', address);
+                isConnected = true;
+                updateWalletStatus(address);
+                hideWalletModal();
+                showNotification('✅ Wallet connecté !');
+            } else {
+                alert('Adresse invalide');
+            }
+        }
+
+        // Swipe System
+        function loadProfiles() {
+            if (currentProfileIndex >= demoProfiles.length) {
+                showNoMoreProfiles();
+                return;
+            }
+            
+            const profile = demoProfiles[currentProfileIndex];
+            displayProfile(profile);
+        }
+
+        function displayProfile(profile) {
+            const container = document.getElementById('swipe-container');
+            container.innerHTML = `
+                <div class="profile-card" id="current-profile" onmousedown="startDrag(event)" onmousemove="drag(event)" onmouseup="endDrag(event)" ontouchstart="startDrag(event)" ontouchmove="drag(event)" ontouchend="endDrag(event)">
+                    <div class="profile-image" style="background-image: url('${profile.image}')"></div>
+                    <div class="profile-info">
+                        <div class="profile-name">${profile.name}, ${profile.age}</div>
+                        <div class="profile-bio">${profile.bio}</div>
+                        <div class="interests">
+                            ${profile.interests.map(interest => `<span class="interest-tag">${interest}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        function startDrag(e) {
+            isDragging = true;
+            startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = (e.type === 'touchmove' ? e.touches[0].clientX : e.clientX) - startX;
+            const card = document.getElementById('current-profile');
+            const rotation = currentX * 0.1;
+            card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+            
+            if (currentX > 50) {
+                card.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            } else if (currentX < -50) {
+                card.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            } else {
+                card.style.background = 'white';
+            }
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            const card = document.getElementById('current-profile');
+            
+            if (currentX > 100) {
+                swipeRight();
+            } else if (currentX < -100) {
+                swipeLeft();
+            } else {
+                card.style.transform = 'translateX(0) rotate(0deg)';
+                card.style.background = 'white';
+            }
+            
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
+        }
+
+        function swipeLeft() {
+            const card = document.getElementById('current-profile');
+            card.classList.add('swiped-left');
+            environmentStats.profilesViewed++;
+            updateStatsDisplay();
+            logDebug('Profile passed');
+            setTimeout(() => {
+                currentProfileIndex++;
+                loadProfiles();
+            }, 300);
+        }
+
+        function swipeRight() {
+            // Vérifier les limites freemium
+            if (!isPremium && dailyLikes >= maxDailyLikes) {
+                showLimitModal('likes');
+                return;
+            }
+            
+            const profile = demoProfiles[currentProfileIndex];
+            likedProfiles.push(profile);
+            dailyLikes++;
+            environmentStats.profilesViewed++;
+            environmentStats.totalLikes++;
+            
+            // Simuler un match (40% de chance)
+            if (Math.random() < 0.4) {
+                matches.push(profile);
+                environmentStats.totalMatches++;
+                showMatchModal(profile);
+                showToast('🎉 Nouveau match !', 2000);
+                logDebug(`Match with ${profile.name}`);
+            } else {
+                showNotification(`❤️ Like envoyé à ${profile.name}!`);
+                showToast('❤️ Like envoyé !', 1500);
+                logDebug(`Like sent to ${profile.name}`);
+            }
+            
+            updateStatsDisplay();
+            const card = document.getElementById('current-profile');
+            card.classList.add('swiped-right');
+            setTimeout(() => {
+                currentProfileIndex++;
+                loadProfiles();
+                updateLimitsDisplay();
+            }, 300);
+        }
+
+        function superLike() {
+            // Vérifier les limites freemium pour Super Like
+            if (!isPremium && superLikesUsed >= maxSuperLikes) {
+                showLimitModal('superlikes');
+                return;
+            }
+            
+            const profile = demoProfiles[currentProfileIndex];
+            likedProfiles.push(profile);
+            superLikesUsed++;
+            dailyLikes++; // Super Like compte aussi comme un like
+            
+            // Super like = match garanti
+            matches.push(profile);
+            showMatchModal(profile);
+            
+            const card = document.getElementById('current-profile');
+            card.classList.add('swiped-right');
+            setTimeout(() => {
+                currentProfileIndex++;
+                loadProfiles();
+                updateLimitsDisplay();
+            }, 300);
+        }
+
+        function showMatchModal(profile) {
+            document.getElementById('match-avatar-large').style.backgroundImage = `url('${profile.image}')`;
+            document.getElementById('match-name-large').textContent = profile.name;
+            document.getElementById('match-modal').style.display = 'block';
+        }
+
+        function startChat() {
+            currentMatch = matches[matches.length - 1];
+            document.getElementById('match-modal').style.display = 'none';
+            showChat();
+        }
+
+        function showNoMoreProfiles() {
+            document.getElementById('swipe-interface').classList.add('hidden');
+            document.getElementById('no-more-profiles').classList.remove('hidden');
+        }
+
+        // Navigation
+        function showSwipe() {
+            hideAllScreens();
+            document.getElementById('swipe-interface').classList.remove('hidden');
+            updateNavigation(0);
+        }
+
+        function showMatches() {
+            hideAllScreens();
+            document.getElementById('matches-screen').classList.remove('hidden');
+            loadMatches();
+            updateNavigation(1);
+        }
+
+        function showPremium() {
+            hideAllScreens();
+            document.getElementById('premium-features').classList.remove('hidden');
+            updateNavigation(2);
+        }
+
+        function showChat() {
+            hideAllScreens();
+            document.getElementById('chat-screen').classList.remove('hidden');
+            document.getElementById('chat-avatar').style.backgroundImage = `url('${currentMatch.image}')`;
+            document.getElementById('chat-name').textContent = currentMatch.name;
+            loadChatMessages();
+        }
+
+        function hideAllScreens() {
+            document.getElementById('swipe-interface').classList.add('hidden');
+            document.getElementById('matches-screen').classList.add('hidden');
+            document.getElementById('chat-screen').classList.add('hidden');
+            document.getElementById('no-more-profiles').classList.add('hidden');
+            document.getElementById('premium-features').classList.add('hidden');
+        }
+
+        function updateNavigation(activeIndex) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach((item, index) => {
+                item.classList.toggle('active', index === activeIndex);
+            });
+        }
+
+        // Matches
+        function loadMatches() {
+            const matchesList = document.getElementById('matches-list');
+            if (matches.length === 0) {
+                matchesList.innerHTML = '<div style="text-align: center; color: #64748b; padding: 40px;">Aucun match pour le moment</div>';
+                return;
+            }
+            
+            matchesList.innerHTML = matches.map(match => `
+                <div class="match-item" onclick="openChat('${match.id}')">
+                    <div class="match-avatar" style="background-image: url('${match.image}')"></div>
+                    <div class="match-name">${match.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function openChat(matchId) {
+            currentMatch = matches.find(m => m.id == matchId);
+            currentChatId = matchId;
+            showChat();
+        }
+        
+        // Chat System
+        function initializeChatMessages() {
+            // Messages de démonstration pour chaque profil
+            chatMessages = {
+                1: [ // Alice
+                    { type: 'received', message: 'Salut ! Comment ça va ? 😊', timestamp: new Date(Date.now() - 3600000) },
+                    { type: 'sent', message: 'Salut Alice ! Ça va super, merci ! Et toi ?', timestamp: new Date(Date.now() - 3500000) },
+                    { type: 'received', message: 'Très bien ! J\'ai vu que tu étais passionné de crypto, c\'est génial ! 🚀', timestamp: new Date(Date.now() - 3400000) },
+                    { type: 'sent', message: 'Oui, j\'adore la DeFi ! Tu t\'y intéresses aussi ?', timestamp: new Date(Date.now() - 3300000) },
+                    { type: 'received', message: 'Absolument ! On pourrait échanger sur nos projets favoris 💎', timestamp: new Date(Date.now() - 3200000) }
+                ],
+                2: [ // Bob
+                    { type: 'received', message: 'Hey ! Tu es développeur ? 💻', timestamp: new Date(Date.now() - 1800000) },
+                    { type: 'sent', message: 'Oui, je fais du blockchain dev ! Et toi ?', timestamp: new Date(Date.now() - 1700000) },
+                    { type: 'received', message: 'Moi aussi ! On devrait collaborer sur un projet 🚀', timestamp: new Date(Date.now() - 1600000) }
+                ],
+                3: [ // Charlie
+                    { type: 'received', message: 'Salut ! J\'ai vu tes intérêts en art, c\'est magnifique ! 🎨', timestamp: new Date(Date.now() - 900000) },
+                    { type: 'sent', message: 'Merci ! Tu fais de l\'art numérique ?', timestamp: new Date(Date.now() - 800000) },
+                    { type: 'received', message: 'Oui ! Je crée des NFTs, tu veux voir mes créations ? ✨', timestamp: new Date(Date.now() - 700000) }
+                ],
+                4: [ // Diana
+                    { type: 'received', message: 'Hello ! Fitness et crypto, on a les mêmes passions ! 💪', timestamp: new Date(Date.now() - 450000) },
+                    { type: 'sent', message: 'Exactement ! Tu fais de la musculation ?', timestamp: new Date(Date.now() - 400000) },
+                    { type: 'received', message: 'Oui ! Et j\'investis dans la DeFi aussi. On devrait s\'entraîner ensemble ! 🏋️‍♀️', timestamp: new Date(Date.now() - 350000) }
+                ],
+                5: [ // Eve
+                    { type: 'received', message: 'Salut ! Photographe et crypto trader, quel combo ! 📸', timestamp: new Date(Date.now() - 200000) },
+                    { type: 'sent', message: 'Merci ! Tu voyages beaucoup pour tes photos ?', timestamp: new Date(Date.now() - 150000) },
+                    { type: 'received', message: 'Oui ! Et je trade pendant mes voyages. On pourrait voyager ensemble ! ✈️', timestamp: new Date(Date.now() - 100000) }
+                ],
+                6: [ // Frank
+                    { type: 'received', message: 'Hey ! Entrepreneur dans la blockchain, intéressant ! 🌍', timestamp: new Date(Date.now() - 60000) },
+                    { type: 'sent', message: 'Salut Frank ! Tu voyages beaucoup pour le business ?', timestamp: new Date(Date.now() - 50000) },
+                    { type: 'received', message: 'Oui ! Toujours en mouvement. On pourrait faire du business ensemble ! 💼', timestamp: new Date(Date.now() - 40000) }
+                ],
+                7: [ // Grace
+                    { type: 'received', message: 'Salut ! Art et musique, on a les mêmes goûts ! 🎵', timestamp: new Date(Date.now() - 30000) },
+                    { type: 'sent', message: 'Exactement ! Tu joues d\'un instrument ?', timestamp: new Date(Date.now() - 25000) },
+                    { type: 'received', message: 'Oui ! Piano et guitare. On pourrait faire de la musique ensemble ! 🎹', timestamp: new Date(Date.now() - 20000) }
+                ],
+                8: [ // Henry
+                    { type: 'received', message: 'Salut ! Tech et sport, parfait combo ! 🏃‍♂️', timestamp: new Date(Date.now() - 10000) },
+                    { type: 'sent', message: 'Merci ! Tu fais quel sport ?', timestamp: new Date(Date.now() - 5000) },
+                    { type: 'received', message: 'Course et musculation ! On pourrait s\'entraîner ensemble ! 💪', timestamp: new Date(Date.now()) }
+                ]
+            };
+        }
+
+        // Chat
+        function loadChatMessages() {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messages = chatMessages[currentChatId] || [];
+            
+            messagesContainer.innerHTML = messages.map(msg => `
+                <div class="message ${msg.type}">
+                    <div class="message-bubble">${msg.message}</div>
+                    <div class="message-time">${formatTime(msg.timestamp)}</div>
+                </div>
+            `).join('');
+            
+            // Scroll vers le bas
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function formatTime(timestamp) {
+            const now = new Date();
+            const messageTime = new Date(timestamp);
+            const diffInMinutes = Math.floor((now - messageTime) / (1000 * 60));
+            
+            if (diffInMinutes < 1) return 'Maintenant';
+            if (diffInMinutes < 60) return `Il y a ${diffInMinutes}min`;
+            if (diffInMinutes < 1440) return `Il y a ${Math.floor(diffInMinutes / 60)}h`;
+            return messageTime.toLocaleDateString();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message || !currentChatId) return;
+            
+            // Ajouter le message à la conversation
+            const newMessage = {
+                type: 'sent',
+                message: message,
+                timestamp: new Date()
+            };
+            
+            if (!chatMessages[currentChatId]) {
+                chatMessages[currentChatId] = [];
+            }
+            chatMessages[currentChatId].push(newMessage);
+            environmentStats.totalMessages++;
+            updateStatsDisplay();
+            logDebug(`Message sent: ${message.substring(0, 20)}...`);
+            
+            // Afficher le message
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML += `
+                <div class="message sent">
+                    <div class="message-bubble">${message}</div>
+                    <div class="message-time">Maintenant</div>
+                </div>
+            `;
+            
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Simuler une réponse intelligente
+            setTimeout(() => {
+                const responses = getSmartResponse(message);
+                const responseMessage = {
+                    type: 'received',
+                    message: responses,
+                    timestamp: new Date()
+                };
+                
+                chatMessages[currentChatId].push(responseMessage);
+                environmentStats.totalMessages++;
+                updateStatsDisplay();
+                logDebug(`Response received: ${responses.substring(0, 20)}...`);
+                
+                messagesContainer.innerHTML += `
+                    <div class="message received">
+                        <div class="message-bubble">${responses}</div>
+                        <div class="message-time">Maintenant</div>
+                    </div>
+                `;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 1000 + Math.random() * 2000); // Délai variable pour plus de réalisme
+        }
+        
+        function getSmartResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            const responses = [
+                "Intéressant ! Raconte-moi en plus 😄",
+                "C'est génial ! J'aimerais en savoir plus 🚀",
+                "Wow ! On a vraiment les mêmes goûts ! 💫",
+                "Exactement ! On devrait se rencontrer bientôt 😊",
+                "Parfait ! Tu veux qu'on échange nos contacts ? 📱",
+                "Super ! J'ai hâte de continuer cette conversation ! ✨",
+                "C'est exactement ce que je pensais ! On se complète bien 🎯",
+                "Incroyable ! On a tellement de choses en commun ! 🌟"
+            ];
+            
+            // Réponses contextuelles
+            if (message.includes('crypto') || message.includes('blockchain')) {
+                return "J'adore la crypto aussi ! Quel est ton projet favori ? 🚀";
+            }
+            if (message.includes('sport') || message.includes('fitness')) {
+                return "Parfait ! On devrait s'entraîner ensemble ! 💪";
+            }
+            if (message.includes('art') || message.includes('musique')) {
+                return "J'adore l'art ! Tu veux voir mes créations ? 🎨";
+            }
+            if (message.includes('voyage') || message.includes('aventure')) {
+                return "Moi aussi j'adore voyager ! Où aimerais-tu aller ? ✈️";
+            }
+            if (message.includes('rencontrer') || message.includes('voir')) {
+                return "Oui ! J'aimerais beaucoup te rencontrer ! 😊";
+            }
+            
+            // Réponse aléatoire
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Premium
+        function purchasePremium() {
+            if (!isConnected) {
+                showWalletModal();
+                return;
+            }
+            
+            showNotification('💳 Redirection vers le paiement SOL...');
+            // Simulation du paiement
+            setTimeout(() => {
+                // Activer Premium pour 30 jours
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 30);
+                
+                localStorage.setItem('isPremium', 'true');
+                localStorage.setItem('premiumExpiry', expiryDate.toISOString());
+                
+                isPremium = true;
+                maxDailyLikes = 999;
+                maxSuperLikes = 5;
+                dailyLikes = 0;
+                superLikesUsed = 0;
+                
+                updateWalletStatus(localStorage.getItem('walletAddress'));
+                updateLimitsDisplay();
+                
+                showNotification('✅ Premium activé ! Likes illimités débloqués !');
+                currentProfileIndex = 0;
+                showSwipe();
+            }, 2000);
+        }
+        
+        function showLimitModal(type) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>${type === 'likes' ? '🚫 Limite de Likes Atteinte' : '⭐ Super Likes Épuisés'}</h3>
+                    <p>${type === 'likes' ? 
+                        'Vous avez utilisé tous vos likes gratuits du jour !' : 
+                        'Vous avez utilisé votre Super Like gratuit !'
+                    }</p>
+                    <div style="background: linear-gradient(135deg, #9945FF, #14F195); color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                        <h4>👑 Passez à Premium !</h4>
+                        <p>• Likes illimités</p>
+                        <p>• 5 Super Likes par jour</p>
+                        <p>• Profils prioritaires</p>
+                        <p>• Filtres avancés</p>
+                        <p style="font-weight: bold; margin-top: 10px;">Seulement 0.05 SOL/mois</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="button" onclick="purchasePremium(); this.closest('.modal').remove();" style="margin-right: 10px;">💳 Acheter Premium</button>
+                        <button class="button secondary" onclick="this.closest('.modal').remove();">Attendre demain</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Utilitaires
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #14F195;
+                color: #000;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function hideSwipeHint() {
+            setTimeout(() => {
+                document.getElementById('swipe-hint').classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Enhanced Environment Functions
+        function initializeEnvironment() {
+            // Charger les statistiques depuis le localStorage
+            const savedStats = localStorage.getItem('frenschain-stats');
+            if (savedStats) {
+                environmentStats = { ...environmentStats, ...JSON.parse(savedStats) };
+            }
+            
+            updateStatsDisplay();
+            logDebug('Environment initialized');
+        }
+        
+        function updateStatsDisplay() {
+            document.getElementById('profiles-viewed').textContent = environmentStats.profilesViewed;
+            document.getElementById('total-likes').textContent = environmentStats.totalLikes;
+            document.getElementById('total-matches').textContent = environmentStats.totalMatches;
+            document.getElementById('total-messages').textContent = environmentStats.totalMessages;
+            
+            // Sauvegarder les statistiques
+            localStorage.setItem('frenschain-stats', JSON.stringify(environmentStats));
+        }
+        
+        function startPerformanceMonitoring() {
+            function updateFPS() {
+                fpsCounter++;
+                const now = Date.now();
+                if (now - lastFpsTime >= 1000) {
+                    document.getElementById('fps-counter').textContent = fpsCounter;
+                    fpsCounter = 0;
+                    lastFpsTime = now;
+                }
+                requestAnimationFrame(updateFPS);
+            }
+            updateFPS();
+        }
+        
+        function toggleDebugPanel() {
+            const debugPanel = document.getElementById('debug-panel');
+            environmentStats.debugMode = !environmentStats.debugMode;
+            debugPanel.classList.toggle('show', environmentStats.debugMode);
+            logDebug('Debug panel toggled');
+        }
+        
+        function logDebug(message) {
+            if (environmentStats.debugMode) {
+                const debugLog = document.getElementById('debug-log');
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                logEntry.style.marginBottom = '5px';
+                logEntry.style.color = '#14F195';
+                debugLog.appendChild(logEntry);
+                debugLog.scrollTop = debugLog.scrollHeight;
+                
+                // Limiter le nombre de logs
+                if (debugLog.children.length > 50) {
+                    debugLog.removeChild(debugLog.firstChild);
+                }
+            }
+        }
+        
+        function showToast(message, duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, duration);
+        }
+        
+        function showLoadingOverlay(message = 'Chargement...') {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div style="text-align: center;">
+                    <div class="loading-spinner"></div>
+                    <div style="margin-top: 20px;">${message}</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+        
+        function hideLoadingOverlay(overlay) {
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        
+        function detectScreenSize() {
+            const isDesktop = window.innerWidth >= 768;
+            const isMobile = window.innerWidth <= 480;
+            const desktopControls = document.getElementById('desktop-controls');
+            
+            if (isDesktop) {
+                desktopControls.classList.remove('hidden');
+            } else {
+                desktopControls.classList.add('hidden');
+            }
+            
+            // Optimisations mobiles
+            if (isMobile) {
+                // Désactiver les contrôles clavier sur mobile
+                document.removeEventListener('keydown', handleKeyboardControls);
+            } else {
+                // Réactiver les contrôles clavier sur desktop
+                document.addEventListener('keydown', handleKeyboardControls);
+            }
+            
+            // Mettre à jour lors du redimensionnement
+            window.addEventListener('resize', function() {
+                const isDesktop = window.innerWidth >= 768;
+                const isMobile = window.innerWidth <= 480;
+                
+                if (isDesktop) {
+                    desktopControls.classList.remove('hidden');
+                } else {
+                    desktopControls.classList.add('hidden');
+                }
+                
+                if (isMobile) {
+                    document.removeEventListener('keydown', handleKeyboardControls);
+                } else {
+                    document.addEventListener('keydown', handleKeyboardControls);
+                }
+            });
+        }
+        
+        function handleKeyboardControls(e) {
+            // Empêcher les actions par défaut pour les touches de navigation
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'Escape'].includes(e.key)) {
+                e.preventDefault();
+            }
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    swipeLeft();
+                    break;
+                case 'ArrowRight':
+                    swipeRight();
+                    break;
+                case 'ArrowUp':
+                    superLike();
+                    break;
+                case 'Escape':
+                    if (document.getElementById('chat-screen').classList.contains('hidden')) {
+                        showSwipe();
+                    } else {
+                        showMatches();
+                    }
+                    break;
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('wallet-status').addEventListener('click', showWalletModal);
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

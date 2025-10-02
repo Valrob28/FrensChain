@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrensChain - Accueil</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .hero-section {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+            margin-bottom: 40px;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        
+        .profile-creation {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #9945FF;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            min-height: 100px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #9945FF;
+        }
+        
+        .interests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .interest-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .interest-option:hover {
+            border-color: #9945FF;
+            background: #f8fafc;
+        }
+        
+        .interest-option.selected {
+            border-color: #9945FF;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+        }
+        
+        .interest-checkbox {
+            margin-right: 10px;
+        }
+        
+        .location-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .location-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .location-allowed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .location-denied {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .location-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .nearby-users {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .user-card {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .user-card:hover {
+            border-color: #9945FF;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(153, 69, 255, 0.1);
+        }
+        
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .user-info h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1e293b;
+        }
+        
+        .user-distance {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+        
+        .user-interests {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .user-interest-tag {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .user-bio {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(153, 69, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #9945FF;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 25px;
+            padding: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 20px;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .nav-btn.active {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+        }
+        
+        .nav-btn:hover {
+            background: #f8fafc;
+        }
+        
+        .nav-btn.active:hover {
+            background: linear-gradient(135deg, #9945FF, #14F195);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #9945FF, #14F195);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .profile-creation,
+            .location-section {
+                padding: 20px;
+            }
+            
+            .interests-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .nearby-users {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">🔥 FrensChain</h1>
+            <p class="hero-subtitle">Trouvez vos âmes sœurs crypto dans votre région</p>
+        </div>
+
+        <!-- Profile Creation Section -->
+        <div class="profile-creation">
+            <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 30px; color: #1e293b;">
+                📱 Créez votre Profil
+            </h2>
+            
+            <form id="profile-form">
+                <div class="form-group">
+                    <label class="form-label">Nom d'utilisateur</label>
+                    <input type="text" id="username" class="form-input" placeholder="Votre nom d'utilisateur" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Âge</label>
+                    <input type="number" id="age" class="form-input" placeholder="Votre âge" min="18" max="100" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Bio</label>
+                    <textarea id="bio" class="form-textarea" placeholder="Parlez-nous de vous..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Vos Intérêts</label>
+                    <div class="interests-grid">
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Crypto">
+                            <span>💰 Crypto</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Tech">
+                            <span>💻 Tech</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Gaming">
+                            <span>🎮 Gaming</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Sport">
+                            <span>🏃 Sport</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Art">
+                            <span>🎨 Art</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Musique">
+                            <span>🎵 Musique</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Voyage">
+                            <span>✈️ Voyage</span>
+                        </div>
+                        <div class="interest-option" onclick="toggleInterest(this)">
+                            <input type="checkbox" class="interest-checkbox" value="Fitness">
+                            <span>💪 Fitness</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                    ✅ Créer mon Profil
+                </button>
+            </form>
+        </div>
+
+        <!-- Location Section -->
+        <div class="location-section">
+            <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 30px; color: #1e293b;">
+                📍 Géolocalisation
+            </h2>
+            
+            <div id="location-status" class="location-status location-pending">
+                <span>📍</span>
+                <span>Demande d'accès à la localisation...</span>
+            </div>
+            
+            <button id="location-btn" class="btn btn-primary" onclick="requestLocation()" style="width: 100%; padding: 15px;">
+                📍 Activer la Géolocalisation
+            </button>
+            
+            <div id="nearby-users" class="nearby-users hidden">
+                <h3 style="font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: #1e293b;">
+                    👥 Utilisateurs à Proximité
+                </h3>
+                <div id="users-list"></div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-users">0</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="nearby-count">0</div>
+                <div class="stat-label">À Proximité</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="matches-today">0</div>
+                <div class="stat-label">Matches Aujourd'hui</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="active-chats">0</div>
+                <div class="stat-label">Conversations</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+        <button class="nav-btn active" onclick="showSection('home')">🏠</button>
+        <button class="nav-btn" onclick="showSection('discover')">🎯</button>
+        <button class="nav-btn" onclick="showSection('matches')">💕</button>
+        <button class="nav-btn" onclick="showSection('profile')">👤</button>
+    </div>
+
+    <script>
+        // Global Variables
+        let userProfile = null;
+        let userLocation = null;
+        let nearbyUsers = [];
+        let locationPermission = false;
+
+        // Initialize
+        window.onload = function() {
+            loadUserProfile();
+            updateStats();
+            requestLocation();
+        };
+
+        // Profile Management
+        function loadUserProfile() {
+            const saved = localStorage.getItem('frenschain-profile');
+            if (saved) {
+                userProfile = JSON.parse(saved);
+                populateProfileForm();
+            }
+        }
+
+        function populateProfileForm() {
+            if (userProfile) {
+                document.getElementById('username').value = userProfile.username || '';
+                document.getElementById('age').value = userProfile.age || '';
+                document.getElementById('bio').value = userProfile.bio || '';
+                
+                // Restore interests
+                userProfile.interests.forEach(interest => {
+                    const option = document.querySelector(`input[value="${interest}"]`);
+                    if (option) {
+                        option.checked = true;
+                        option.closest('.interest-option').classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        function toggleInterest(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('selected', checkbox.checked);
+        }
+
+        // Form Submission
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const age = document.getElementById('age').value;
+            const bio = document.getElementById('bio').value;
+            const interests = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            
+            if (!username || !age || interests.length === 0) {
+                showToast('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            userProfile = {
+                username,
+                age: parseInt(age),
+                bio,
+                interests,
+                createdAt: new Date().toISOString(),
+                location: userLocation
+            };
+            
+            localStorage.setItem('frenschain-profile', JSON.stringify(userProfile));
+            showToast('✅ Profil créé avec succès !');
+            
+            // Update nearby users if location is available
+            if (locationPermission) {
+                findNearbyUsers();
+            }
+        });
+
+        // Location Management
+        function requestLocation() {
+            if (!navigator.geolocation) {
+                updateLocationStatus('denied', 'Géolocalisation non supportée');
+                return;
+            }
+            
+            updateLocationStatus('pending', 'Demande d\'accès à la localisation...');
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    userLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    updateLocationStatus('allowed', `Localisation: ${userLocation.latitude.toFixed(4)}, ${userLocation.longitude.toFixed(4)}`);
+                    locationPermission = true;
+                    findNearbyUsers();
+                },
+                function(error) {
+                    let message = 'Erreur de géolocalisation';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message = 'Permission de localisation refusée';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message = 'Position non disponible';
+                            break;
+                        case error.TIMEOUT:
+                            message = 'Délai d\'attente dépassé';
+                            break;
+                    }
+                    updateLocationStatus('denied', message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        }
+
+        function updateLocationStatus(status, message) {
+            const statusEl = document.getElementById('location-status');
+            statusEl.className = `location-status location-${status}`;
+            statusEl.innerHTML = `<span>📍</span><span>${message}</span>`;
+        }
+
+        // Nearby Users
+        function findNearbyUsers() {
+            if (!userLocation) return;
+            
+            // Simulate nearby users based on location
+            const mockUsers = generateMockUsers();
+            nearbyUsers = mockUsers.filter(user => {
+                const distance = calculateDistance(
+                    userLocation.latitude, userLocation.longitude,
+                    user.location.latitude, user.location.longitude
+                );
+                return distance <= 50; // Within 50km
+            });
+            
+            displayNearbyUsers();
+            updateStats();
+        }
+
+        function generateMockUsers() {
+            const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry'];
+            const interests = ['Crypto', 'Tech', 'Gaming', 'Sport', 'Art', 'Musique', 'Voyage', 'Fitness'];
+            const bios = [
+                'Passionné de crypto et d\'aventures ! 🚀',
+                'Développeur blockchain, gamer et crypto enthusiast 💻',
+                'Artiste numérique et collectionneur NFT 🎨',
+                'Fitness coach et entrepreneure dans la DeFi 💪',
+                'Photographe de voyage et crypto trader 📸',
+                'Entrepreneur dans la blockchain et globe-trotter 🌍',
+                'Artiste et musicienne, collectionneuse d\'art NFT 🎵',
+                'Ingénieur logiciel et athlète 🏃‍♂️'
+            ];
+            
+            return names.map((name, index) => {
+                const baseLat = userLocation.latitude + (Math.random() - 0.5) * 0.1;
+                const baseLng = userLocation.longitude + (Math.random() - 0.5) * 0.1;
+                
+                return {
+                    id: index + 1,
+                    name,
+                    age: 22 + Math.floor(Math.random() * 15),
+                    bio: bios[index],
+                    interests: interests.slice(0, 2 + Math.floor(Math.random() * 3)),
+                    location: {
+                        latitude: baseLat,
+                        longitude: baseLng
+                    },
+                    avatar: `https://images.unsplash.com/photo-${1494790108755 + index}?w=100&h=100&fit=crop&crop=face`
+                };
+            });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function displayNearbyUsers() {
+            const container = document.getElementById('users-list');
+            const nearbySection = document.getElementById('nearby-users');
+            
+            if (nearbyUsers.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b;">Aucun utilisateur à proximité</p>';
+                nearbySection.classList.remove('hidden');
+                return;
+            }
+            
+            container.innerHTML = nearbyUsers.map(user => {
+                const distance = calculateDistance(
+                    userLocation.latitude, userLocation.longitude,
+                    user.location.latitude, user.location.longitude
+                );
+                
+                return `
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">${user.name.charAt(0)}</div>
+                            <div>
+                                <h3>${user.name}, ${user.age}</h3>
+                                <div class="user-distance">📍 ${distance.toFixed(1)} km</div>
+                            </div>
+                        </div>
+                        <div class="user-interests">
+                            ${user.interests.map(interest => `<span class="user-interest-tag">${interest}</span>`).join('')}
+                        </div>
+                        <div class="user-bio">${user.bio}</div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="likeUser(${user.id})">❤️ Liker</button>
+                            <button class="btn btn-secondary" onclick="passUser(${user.id})">❌ Passer</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            nearbySection.classList.remove('hidden');
+        }
+
+        // User Actions
+        function likeUser(userId) {
+            const user = nearbyUsers.find(u => u.id === userId);
+            if (user) {
+                showToast(`❤️ Like envoyé à ${user.name} !`);
+                // Simulate match chance
+                if (Math.random() < 0.3) {
+                    setTimeout(() => showToast(`🎉 Match avec ${user.name} !`), 1000);
+                }
+            }
+        }
+
+        function passUser(userId) {
+            const user = nearbyUsers.find(u => u.id === userId);
+            if (user) {
+                showToast(`❌ ${user.name} passé`);
+                nearbyUsers = nearbyUsers.filter(u => u.id !== userId);
+                displayNearbyUsers();
+            }
+        }
+
+        // Navigation
+        function showSection(section) {
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Handle section switching
+            switch(section) {
+                case 'home':
+                    // Already on home
+                    break;
+                case 'discover':
+                    window.location.href = 'tinder.html';
+                    break;
+                case 'matches':
+                    showToast('💕 Redirection vers les matches...');
+                    break;
+                case 'profile':
+                    showToast('👤 Redirection vers le profil...');
+                    break;
+            }
+        }
+
+        // Stats
+        function updateStats() {
+            document.getElementById('total-users').textContent = '1,247';
+            document.getElementById('nearby-count').textContent = nearbyUsers.length;
+            document.getElementById('matches-today').textContent = Math.floor(Math.random() * 10);
+            document.getElementById('active-chats').textContent = Math.floor(Math.random() * 5);
+        }
+
+        // Utilities
+        function showToast(message, duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, duration);
+        }
+    </script>
+</body>
+</html>

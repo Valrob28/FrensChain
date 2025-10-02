@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrensChain - Application de Rencontre Solana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+        
+        .pricing {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .price-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .price-card.featured {
+            border-color: #6366f1;
+            background: #f0f9ff;
+        }
+        
+        .price-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .price-amount {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #6366f1;
+            margin-bottom: 10px;
+        }
+        
+        .price-description {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .api-status {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .status-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .status-success {
+            color: #10b981;
+        }
+        
+        .status-error {
+            color: #ef4444;
+        }
+        
+        .button {
+            background: #6366f1;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        
+        .button:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+        }
+        
+        .button.secondary {
+            background: transparent;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+        }
+        
+        .button.secondary:hover {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Styles pour les modales */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* Styles pour l'interface de swipe */
+        .swipe-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .swipe-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            background: #f1f5f9;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 500px;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+        }
+        
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-info {
+            padding: 20px;
+        }
+        
+        .profile-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+        
+        .interests {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .interest-tag {
+            background: #e0e7ff;
+            color: #6366f1;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .bio {
+            color: #64748b;
+            line-height: 1.5;
+        }
+        
+        .swipe-actions {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+        
+        .swipe-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .swipe-button.pass {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .swipe-button.like {
+            background: #ec4899;
+            color: white;
+        }
+        
+        .swipe-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .end-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .end-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        
+        .matches-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .match-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .match-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🚀 FrensChain</h1>
+            <p class="subtitle">Application de Rencontre Solana</p>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">✨ Fonctionnalités</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔗</div>
+                    <div>
+                        <strong>Paiements SOL</strong><br>
+                        <small>Abonnements en crypto</small>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💬</div>
+                    <div>
+                        <strong>Chat Temps Réel</strong><br>
+                        <small>Messages chiffrés</small>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <div>
+                        <strong>Matching Intelligent</strong><br>
+                        <small>Algorithmes avancés</small>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🏆</div>
+                    <div>
+                        <strong>Gamification</strong><br>
+                        <small>Badges et récompenses</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">💰 Tarifs d'Abonnement</h2>
+            <div class="pricing">
+                <div class="price-card featured">
+                    <div class="price-title">Early Bird</div>
+                    <div class="price-amount">0.1 SOL</div>
+                    <div class="price-description">2000 premiers utilisateurs<br>6 mois d'accès</div>
+                </div>
+                <div class="price-card">
+                    <div class="price-title">Regular</div>
+                    <div class="price-amount">0.2 SOL</div>
+                    <div class="price-description">3000 utilisateurs suivants<br>6 mois d'accès</div>
+                </div>
+                <div class="price-card">
+                    <div class="price-title">Monthly</div>
+                    <div class="price-amount">0.05 SOL</div>
+                    <div class="price-description">Abonnement mensuel<br>Récurrent</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">🔧 Statut Backend</h2>
+            <div class="api-status">
+                <div class="status-item">
+                    <span class="status-icon" id="health-icon">⏳</span>
+                    <span id="health-text">Vérification du backend...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon" id="test-icon">⏳</span>
+                    <span id="test-text">Test de l'API...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon" id="pricing-icon">⏳</span>
+                    <span id="pricing-text">Vérification des prix...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">🚀 Actions</h2>
+            <div id="connection-status" style="text-align: center; margin-bottom: 20px;">
+                ❌ Wallet requis | ❌ Profil requis | <button class="button" onclick="connectWallet()">🔗 Connecter Wallet</button>
+            </div>
+            <div style="text-align: center;">
+                <button class="button secondary" onclick="testAPI()">
+                    🧪 Tester l'API
+                </button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+
+        <!-- Interface de Swipe (cachée par défaut) -->
+        <div id="swipe-interface" style="display: none;">
+            <div class="swipe-container">
+                <div class="swipe-header">
+                    <button class="back-button" onclick="location.reload()">← Retour</button>
+                    <h2>🎯 Découvrir des Profils</h2>
+                </div>
+                
+                <div class="profile-card" id="profile-card">
+                    <!-- Les profils s'affichent ici -->
+                </div>
+                
+                <div class="swipe-actions">
+                    <button class="swipe-button pass" onclick="swipeLeft()">❌</button>
+                    <button class="swipe-button like" onclick="swipeRight()">❤️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Connexion Wallet -->
+        <div id="wallet-modal" class="modal">
+            <div class="modal-content">
+                <h3>🔗 Connexion Wallet</h3>
+                <p>Entrez votre adresse wallet Solana :</p>
+                <input type="text" id="wallet-address" placeholder="Ex: 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+                <div style="text-align: center;">
+                    <button class="button" onclick="connectWalletAction()">Connecter</button>
+                    <button class="button secondary" onclick="hideModal('wallet-modal')">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Création Profil -->
+        <div id="profile-modal" class="modal">
+            <div class="modal-content">
+                <h3>📱 Créer votre Profil</h3>
+                <input type="text" id="username" placeholder="Nom d'utilisateur" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+                
+                <p>Vos intérêts :</p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0;">
+                    <label><input type="checkbox" name="interest" value="Crypto"> Crypto</label>
+                    <label><input type="checkbox" name="interest" value="Tech"> Tech</label>
+                    <label><input type="checkbox" name="interest" value="Gaming"> Gaming</label>
+                    <label><input type="checkbox" name="interest" value="Sport"> Sport</label>
+                    <label><input type="checkbox" name="interest" value="Art"> Art</label>
+                    <label><input type="checkbox" name="interest" value="Musique"> Musique</label>
+                    <label><input type="checkbox" name="interest" value="Voyage"> Voyage</label>
+                    <label><input type="checkbox" name="interest" value="Fitness"> Fitness</label>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="button" onclick="createProfileAction()">Créer Profil</button>
+                    <button class="button secondary" onclick="hideModal('profile-modal')">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Match -->
+        <div id="match-modal" class="modal">
+            <div class="modal-content">
+                <h3>🎉 C'est un Match !</h3>
+                <div style="text-align: center;">
+                    <img id="match-image" src="" alt="Match" style="width: 100px; height: 100px; border-radius: 50%; margin: 20px;">
+                    <p>Vous avez matché avec <span id="match-name"></span> !</p>
+                    <button class="button" onclick="hideModal('match-modal')">Continuer</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>FrensChain - Application de rencontre basée sur Solana</p>
+            <p>Backend: <span id="backend-status">Vérification...</span> | Frontend: ✅ Actif</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        
+        // Vérifier le statut du backend au chargement
+        window.onload = function() {
+            checkBackendStatus();
+            updateConnectionStatus();
+        };
+        
+        async function checkBackendStatus() {
+            try {
+                // Test Health Check
+                const healthResponse = await fetch(`${API_BASE}/health`);
+                if (healthResponse.ok) {
+                    document.getElementById('health-icon').textContent = '✅';
+                    document.getElementById('health-icon').className = 'status-icon status-success';
+                    document.getElementById('health-text').textContent = 'Backend opérationnel';
+                } else {
+                    throw new Error('Health check failed');
+                }
+                
+                // Test API
+                const testResponse = await fetch(`${API_BASE}/test`);
+                if (testResponse.ok) {
+                    document.getElementById('test-icon').textContent = '✅';
+                    document.getElementById('test-icon').className = 'status-icon status-success';
+                    document.getElementById('test-text').textContent = 'API fonctionnelle';
+                } else {
+                    throw new Error('API test failed');
+                }
+                
+                // Test Pricing
+                const pricingResponse = await fetch(`${API_BASE}/pricing`);
+                if (pricingResponse.ok) {
+                    document.getElementById('pricing-icon').textContent = '✅';
+                    document.getElementById('pricing-icon').className = 'status-icon status-success';
+                    document.getElementById('pricing-text').textContent = 'Prix disponibles';
+                } else {
+                    throw new Error('Pricing failed');
+                }
+                
+                document.getElementById('backend-status').textContent = '✅ Actif';
+                document.getElementById('backend-status').style.color = '#10b981';
+                
+            } catch (error) {
+                console.error('Erreur backend:', error);
+                document.getElementById('health-icon').textContent = '❌';
+                document.getElementById('health-icon').className = 'status-icon status-error';
+                document.getElementById('health-text').textContent = 'Backend non disponible';
+                document.getElementById('backend-status').textContent = '❌ Inactif';
+                document.getElementById('backend-status').style.color = '#ef4444';
+            }
+        }
+        
+        function connectWallet() {
+            showModal('wallet-modal');
+        }
+        
+        function createProfile() {
+            showModal('profile-modal');
+        }
+        
+        function showSwipeInterface() {
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('swipe-interface').style.display = 'block';
+            loadProfiles();
+        }
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function connectWalletAction() {
+            const walletAddress = document.getElementById('wallet-address').value;
+            if (!walletAddress) {
+                alert('Veuillez entrer une adresse wallet');
+                return;
+            }
+            
+            // Simuler la connexion
+            localStorage.setItem('walletAddress', walletAddress);
+            localStorage.setItem('isConnected', 'true');
+            
+            alert('✅ Wallet connecté: ' + walletAddress);
+            hideModal('wallet-modal');
+            updateConnectionStatus();
+        }
+        
+        function createProfileAction() {
+            const username = document.getElementById('username').value;
+            const interests = Array.from(document.querySelectorAll('input[name="interest"]:checked')).map(cb => cb.value);
+            
+            if (!username || interests.length === 0) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+            
+            // Sauvegarder le profil
+            const profile = {
+                username: username,
+                interests: interests,
+                createdAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            localStorage.setItem('hasProfile', 'true');
+            
+            alert('✅ Profil créé avec succès!');
+            hideModal('profile-modal');
+            updateConnectionStatus();
+        }
+        
+        function updateConnectionStatus() {
+            const isConnected = localStorage.getItem('isConnected') === 'true';
+            const hasProfile = localStorage.getItem('hasProfile') === 'true';
+            
+            if (isConnected && hasProfile) {
+                document.getElementById('connection-status').innerHTML = 
+                    '✅ Wallet connecté | ✅ Profil créé | <button class="button" onclick="showSwipeInterface()">🎯 Commencer à Swiper</button>';
+            } else if (isConnected) {
+                document.getElementById('connection-status').innerHTML = 
+                    '✅ Wallet connecté | ❌ Profil requis | <button class="button" onclick="createProfile()">📱 Créer Profil</button>';
+            } else {
+                document.getElementById('connection-status').innerHTML = 
+                    '❌ Wallet requis | ❌ Profil requis | <button class="button" onclick="connectWallet()">🔗 Connecter Wallet</button>';
+            }
+        }
+        
+        // Profils de démonstration
+        const demoProfiles = [
+            {
+                id: 1,
+                name: "Alice",
+                age: 25,
+                interests: ["Crypto", "Voyage", "Sport"],
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+                bio: "Passionnée de crypto et d'aventures ! 🚀"
+            },
+            {
+                id: 2,
+                name: "Bob",
+                age: 28,
+                interests: ["Tech", "Gaming", "Crypto"],
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+                bio: "Développeur blockchain, gamer et crypto enthusiast 💻"
+            },
+            {
+                id: 3,
+                name: "Charlie",
+                age: 23,
+                interests: ["Art", "Musique", "Crypto"],
+                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
+                bio: "Artiste numérique et collectionneur NFT 🎨"
+            },
+            {
+                id: 4,
+                name: "Diana",
+                age: 27,
+                interests: ["Fitness", "Crypto", "Entrepreneuriat"],
+                image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
+                bio: "Fitness coach et entrepreneure dans la DeFi 💪"
+            },
+            {
+                id: 5,
+                name: "Eve",
+                age: 26,
+                interests: ["Photographie", "Voyage", "Crypto"],
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face",
+                bio: "Photographe de voyage et crypto trader 📸"
+            }
+        ];
+        
+        let currentProfileIndex = 0;
+        let likedProfiles = [];
+        let matches = [];
+        
+        function loadProfiles() {
+            if (currentProfileIndex >= demoProfiles.length) {
+                showEndScreen();
+                return;
+            }
+            
+            const profile = demoProfiles[currentProfileIndex];
+            displayProfile(profile);
+        }
+        
+        function displayProfile(profile) {
+            const profileCard = document.getElementById('profile-card');
+            profileCard.innerHTML = `
+                <div class="profile-image">
+                    <img src="${profile.image}" alt="${profile.name}">
+                </div>
+                <div class="profile-info">
+                    <h2>${profile.name}, ${profile.age}</h2>
+                    <div class="interests">
+                        ${profile.interests.map(interest => `<span class="interest-tag">${interest}</span>`).join('')}
+                    </div>
+                    <p class="bio">${profile.bio}</p>
+                </div>
+            `;
+        }
+        
+        function swipeLeft() {
+            console.log('Swiped left on profile', currentProfileIndex);
+            currentProfileIndex++;
+            loadProfiles();
+        }
+        
+        function swipeRight() {
+            const profile = demoProfiles[currentProfileIndex];
+            likedProfiles.push(profile);
+            
+            // Simuler un match (30% de chance)
+            if (Math.random() < 0.3) {
+                matches.push(profile);
+                showMatchModal(profile);
+            } else {
+                showLikeNotification(profile);
+            }
+            
+            currentProfileIndex++;
+            loadProfiles();
+        }
+        
+        function showMatchModal(profile) {
+            const modal = document.getElementById('match-modal');
+            document.getElementById('match-name').textContent = profile.name;
+            document.getElementById('match-image').src = profile.image;
+            modal.style.display = 'block';
+        }
+        
+        function showLikeNotification(profile) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `❤️ Like envoyé à ${profile.name}!`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        function showEndScreen() {
+            document.getElementById('swipe-interface').innerHTML = `
+                <div class="end-screen">
+                    <h2>🎉 Fini de swiper !</h2>
+                    <p>Vous avez liké ${likedProfiles.length} profils</p>
+                    <p>Vous avez ${matches.length} match${matches.length > 1 ? 'es' : ''} !</p>
+                    <div class="matches-list">
+                        ${matches.map(match => `
+                            <div class="match-item">
+                                <img src="${match.image}" alt="${match.name}">
+                                <span>${match.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="button" onclick="location.reload()">🔄 Recommencer</button>
+                </div>
+            `;
+        }
+        
+        async function testAPI() {
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/test`);
+                const data = await response.json();
+                alert('🧪 Test API réussi!\n\n' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                alert('❌ Erreur API: ' + error.message);
+            }
+            hideLoading();
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
