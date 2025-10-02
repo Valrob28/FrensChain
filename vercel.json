@@ -1,6 +1,10 @@
 {
   "name": "frenschain-dating-app",
   "version": 2,
+  "framework": "vanilla",
+  "buildCommand": "echo 'No build required for static files'",
+  "outputDirectory": "simple-web",
+  "installCommand": "echo 'No dependencies to install'",
   "builds": [
     {
       "src": "simple-web/**/*",
@@ -21,6 +25,10 @@
       "dest": "/simple-web/tinder.html"
     },
     {
+      "src": "/index",
+      "dest": "/simple-web/index.html"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/backend/src/index-simple.ts"
     }
@@ -29,5 +37,16 @@
     "backend/src/index-simple.ts": {
       "runtime": "nodejs18.x"
     }
-  }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
 }
