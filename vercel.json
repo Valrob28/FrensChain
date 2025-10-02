@@ -1,7 +1,6 @@
 {
   "name": "frenschain-dating-app",
   "version": 2,
-  "framework": "vanilla",
   "buildCommand": "echo 'No build required for static files'",
   "outputDirectory": "simple-web",
   "installCommand": "echo 'No dependencies to install'",
