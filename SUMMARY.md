@@ -205,3 +205,4 @@ vercel --name frenschain-dating-$(date +%Y%m%d%H%M%S)
 ---
 
 **FrensChain** - Trouvez vos âmes sœurs crypto dans votre région ! 🔥💜
+

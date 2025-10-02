@@ -85,3 +85,4 @@ echo "   vercel env                    # Variables d'environnement"
 echo ""
 echo "🎯 Votre application FrensChain est maintenant en ligne !"
 echo "🔗 URL: https://$PROJECT_NAME.vercel.app"
+

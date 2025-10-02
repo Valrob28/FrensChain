@@ -95,3 +95,4 @@ echo "   - 📊 Analytics et debug"
 echo "   - 🎨 Design Solana officiel"
 echo ""
 echo "🎯 Votre application FrensChain est maintenant en ligne !"
+

@@ -192,3 +192,4 @@ Votre application **FrensChain** est maintenant déployée et accessible au mond
 ---
 
 **FrensChain** - Trouvez vos âmes sœurs crypto dans votre région ! 🔥💜
+

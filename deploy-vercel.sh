@@ -95,3 +95,4 @@ echo "   vercel domains       # Gérer les domaines"
 echo "   vercel env           # Variables d'environnement"
 echo ""
 echo "🎯 Votre application FrensChain est maintenant en ligne !"
+

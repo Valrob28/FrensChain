@@ -163,3 +163,4 @@ echo "4. Configurer les variables d'environnement"
 echo "5. Tester l'application en production"
 echo ""
 echo "📖 Guide complet : DEPLOY-MANUAL.md"
+
